@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"constant":[["MAX_SIG","最大的信号编号"]],"enum":[["SignalNo","信号编号。"]],"struct":[["SignalAction","信号处理函数的定义"]]};

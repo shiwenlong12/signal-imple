@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"constant":[["MAX_SIG","最大的信号编号"]],"enum":[["SignalNo","信号编号。"],["SignalResult","信号处理函数返回得到的结果"]],"struct":[["LocalContext","线程上下文。"],["SignalAction","信号处理函数的定义"]],"trait":[["Signal","一个信号模块需要对外暴露的接口"]]};

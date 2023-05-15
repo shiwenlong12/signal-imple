@@ -35,6 +35,7 @@ pub struct SignalImpl {
 }
 
 impl SignalImpl {
+    /// 创建一个新的信号管理器
     pub fn new() -> Self {
         Self {
             received: SignalSet::empty(),
@@ -190,96 +191,8 @@ impl Signal for SignalImpl {
 mod tests{
     use signal::Signal;
 
-    use crate::{SignalImpl, SignalSet};
-
-    // pub struct SyscallContext;
-
-    // impl Signal for SyscallContext {
-    //     fn kill(&self, _caller: Caller, pid: isize, signum: u8) -> isize {
-    //         if let Some(target_task) =
-    //             unsafe { PROCESSOR.get_task(ProcId::from_usize(pid as usize)) }
-    //         {
-    //             if let Ok(signal_no) = SignalNo::try_from(signum) {
-    //                 if signal_no != SignalNo::ERR {
-    //                     target_task.signal.add_signal(signal_no);
-    //                     return 0;
-    //                 }
-    //             }
-    //         }
-    //         -1
-    //     }
-
-    //     fn sigaction(
-    //         &self,
-    //         _caller: Caller,
-    //         signum: u8,
-    //         action: usize,
-    //         old_action: usize,
-    //     ) -> isize {
-    //         if signum as usize > signal::MAX_SIG {
-    //             return -1;
-    //         }
-    //         let current = unsafe { PROCESSOR.current().unwrap() };
-    //         if let Ok(signal_no) = SignalNo::try_from(signum) {
-    //             if signal_no == SignalNo::ERR {
-    //                 return -1;
-    //             }
-    //             // 如果需要返回原来的处理函数，则从信号模块中获取
-    //             if old_action as usize != 0 {
-    //                 if let Some(mut ptr) = current
-    //                     .address_space
-    //                     .translate(VAddr::new(old_action), WRITEABLE)
-    //                 {
-    //                     if let Some(signal_action) = current.signal.get_action_ref(signal_no) {
-    //                         *unsafe { ptr.as_mut() } = signal_action;
-    //                     } else {
-    //                         return -1;
-    //                     }
-    //                 } else {
-    //                     // 如果返回了 None，说明 signal_no 无效
-    //                     return -1;
-    //                 }
-    //             }
-    //             // 如果需要设置新的处理函数，则设置到信号模块中
-    //             if action as usize != 0 {
-    //                 if let Some(ptr) = current
-    //                     .address_space
-    //                     .translate(VAddr::new(action), READABLE)
-    //                 {
-    //                     // 如果返回了 false，说明 signal_no 无效
-    //                     if !current
-    //                         .signal
-    //                         .set_action(signal_no, &unsafe { *ptr.as_ptr() })
-    //                     {
-    //                         return -1;
-    //                     }
-    //                 } else {
-    //                     return -1;
-    //                 }
-    //             }
-    //             return 0;
-    //         }
-    //         -1
-    //     }
-
-    //     fn sigprocmask(&self, _caller: Caller, mask: usize) -> isize {
-    //         let current = unsafe { PROCESSOR.current().unwrap() };
-    //         current.signal.update_mask(mask) as isize
-    //     }
-
-    //     fn sigreturn(&self, _caller: Caller) -> isize {
-    //         let current = unsafe { PROCESSOR.current().unwrap() };
-    //         // 如成功，则需要修改当前用户程序的 LocalContext
-    //         if current.signal.sig_return(&mut current.context.context) {
-    //             0
-    //         } else {
-    //             -1
-    //         }
-    //     }
-    // }
-
-
-
+    use crate::{SignalImpl, SignalSet, DefaultAction};
+    use crate::LocalContext;
     #[test]
     fn test_signal_impl() {
         let mut sig1 = SignalImpl::new();
@@ -294,19 +207,69 @@ mod tests{
         let hand1 = (& sig2).is_handling_signal();
         assert_eq!(false, hand1);
         (& sig2).get_action_ref(signal::SignalNo::SIGABRT);
+
+        let mask1 = (&mut sig1).update_mask(0001);
+        assert_eq!(0, mask1);
+        let mask1 = (&mut sig1).update_mask(0002);
+        assert_eq!(1, mask1);
+
+        let mut local1 = LocalContext::empty();
+        let _result1 = (&mut sig1).handle_signals(&mut local1);
+
     }
 
     #[test]
     fn test_default_action() {
-        
+        let default1 = DefaultAction::Ignore;
+        let default2 = DefaultAction::from(signal::SignalNo::SIGABRT);
+        let default3 = DefaultAction::from(signal::SignalNo::SIGCHLD);
+        let default4 = DefaultAction::from(signal::SignalNo::SIGURG);
+        assert_eq!(default3, default1);
+        assert_eq!(default4, default1);
+        assert_eq!(default2, DefaultAction::Terminate(-6));
+        // DefaultAction::into(default1);
     }
 
     #[test]
     fn test_signal_set() {
-        let value = 1;
+        let value = 2;
+        let kth1 = 1;
+        let kth2 = 10;
+        //创建字符数组sigset
         let mut sigset1 = SignalSet::empty();
-        SignalSet::new(value);
+        let sigset2 = SignalSet::new(value);
+        //直接暴力写入 SignalSet，sigset1.0 = value
         (&mut sigset1).reset(value);
+        assert_eq!(sigset1.0, 2);
+        //清空 SignalSet
         (&mut sigset1).clear();
+        assert_eq!(sigset1.0, 0);
+        //新增一个 bit
+        (&mut sigset1).add_bit(kth1);
+        assert_eq!(sigset1.0, 2);
+        //删除一个 bit
+        (&mut sigset1).remove_bit(kth1);
+        assert_eq!(sigset1.0, 0);
+        //取交集
+        (&mut sigset1).get_union(sigset2);
+        assert_eq!(sigset1.0, 2);
+        //取差集，即去掉 set 中的内容
+        (&mut sigset1).get_difference(sigset2);
+        assert_eq!(sigset1.0, 0);
+        //直接设置为新值，并返回旧的值
+        let old = (&mut sigset1).set_new(sigset2);
+        assert_eq!(sigset1.0, 2);
+        assert_eq!(old, 0);
+
+        //是否包含第 k 个 bit
+        let con1 = (& sigset2).contain_bit(kth1);
+        assert_eq!(con1, true);
+        let con2 = (& sigset2).contain_bit(kth2);
+        assert_eq!(con2, false);
+        //获取后缀0个数，可以用来寻找最小的1
+        let little = sigset2.get_trailing_zeros();
+        assert_eq!(little, 1);
+        // //寻找不在mask中的最小的 1 的位置，如果有，返回其位置，如没有则返回 None。
+        // sigset2.find_first_one();
     }
 }

@@ -3,11 +3,6 @@
 version = 3
 
 [[package]]
-name = "kernel-context"
-version = "0.1.0"
-source = "git+https://github.com/shiwenlong12/kernel-context#9787baf2ab3aa2b862543db05a2482cc45320e0e"
-
-[[package]]
 name = "numeric-enum-macro"
 version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -16,16 +11,15 @@ checksum = "300e4bdb6b46b592948e700ea1ef24a4296491f6a0ee722b258040abd15a3714"
 [[package]]
 name = "signal"
 version = "0.1.0"
-source = "git+https://github.com/shiwenlong12/signal#4cf73010735ddb8753a4b7cafec099a8047ff67a"
+source = "git+https://github.com/shiwenlong12/signal#036800862a3c8de14ee2ecc6074174e6f0d96787"
 dependencies = [
- "kernel-context",
  "signal-defs",
 ]
 
 [[package]]
 name = "signal-defs"
 version = "0.1.0"
-source = "git+https://github.com/shiwenlong12/signal-defs#31744a8283877974fa31d0090dd126292218ade1"
+source = "git+https://github.com/shiwenlong12/signal-defs#c2b3e1f986e9f4961c794c2654a4d0001e8c5359"
 dependencies = [
  "numeric-enum-macro",
 ]
@@ -34,6 +28,5 @@ dependencies = [
 name = "signal-impl"
 version = "0.1.0"
 dependencies = [
- "kernel-context",
  "signal",
 ]

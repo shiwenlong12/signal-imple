@@ -23,6 +23,7 @@ impl SignalSet {
         self.0 = 0;
     }
     /// 是否包含第 k 个 bit
+    /// 位运算，&两个位都为1时，结果才为1，>>各二进位全部右移若干位，对无符号数，高位补0
     pub fn contain_bit(&self, kth: usize) -> bool {
         ((self.0 >> kth) & 1) > 0
     }

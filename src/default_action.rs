@@ -2,6 +2,7 @@ use super::{SignalNo, SignalResult};
 
 /// 没有处理函数时的默认行为。
 /// 参见 `https://venam.nixers.net/blog/unix/2016/10/21/unix-signals.html`
+#[derive(PartialEq, Debug)]
 pub enum DefaultAction {
     Terminate(i32), // 结束进程。其实更标准的实现应该细分为 terminate / terminate(core dump) / stop
     Ignore,         // 忽略信号

@@ -1,0 +1,3 @@
+(function() {var implementors = {
+"signal_impl":[["impl <a class=\"trait\" href=\"signal/trait.Signal.html\" title=\"trait signal::Signal\">Signal</a> for <a class=\"struct\" href=\"signal_impl/struct.SignalImpl.html\" title=\"struct signal_impl::SignalImpl\">SignalImpl</a>"]]
+};if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

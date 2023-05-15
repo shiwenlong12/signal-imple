@@ -1,0 +1,45 @@
+use signal::Signal;
+use signal_impl::{SignalImpl, SignalSet};
+use signal::LocalContext;
+
+#[test]
+fn test_signal_impl() {
+    let mut sig1 = SignalImpl::new();
+    let sig2 = SignalImpl::new();
+    let fetch1 = (&mut sig1).fetch_signal();
+    assert_eq!(None, fetch1);
+    let fetch2 = (&mut sig1).fetch_and_remove(signal::SignalNo::ERR);
+    assert_eq!(false, fetch2);
+    (&mut sig1).from_fork();
+    (&mut sig1).clear();
+    (&mut sig1).add_signal(signal::SignalNo::SIGABRT);
+    let hand1 = (& sig2).is_handling_signal();
+    assert_eq!(false, hand1);
+    (& sig2).get_action_ref(signal::SignalNo::SIGABRT);
+
+    let mask1 = (&mut sig1).update_mask(0001);
+    assert_eq!(0, mask1);
+    let mask1 = (&mut sig1).update_mask(0002);
+    assert_eq!(1, mask1);
+
+    let mut local1 = LocalContext::empty();
+    let result1 = (&mut sig1).handle_signals(&mut local1);
+
+}
+
+use signal_imple::DefaultAction;
+#[test]
+fn test_default_action() {
+    let default1 = DefaultAction::Ignore;
+    DefaultAction::from(signal::SignalNo::SIGABRT);
+    //DefaultAction::into(default1);
+}
+
+#[test]
+fn test_signal_set() {
+    let value = 1;
+    let mut sigset1 = SignalSet::empty();
+    SignalSet::new(value);
+    (&mut sigset1).reset(value);
+    (&mut sigset1).clear();
+}

@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":[["HandlingSignal","正在处理的信号"]],"struct":[["SignalImpl","管理一个进程中的信号"]]};
